@@ -276,7 +276,7 @@
       flex-shrink: 0;
       transition: background 0.15s, transform 0.1s;
     }
-
+    
     #send-btn:hover { background: var(--purple-dark); }
     #send-btn:active { transform: scale(0.95); }
     #send-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
@@ -507,8 +507,11 @@ async function sendMessage() {
   try {
     const res = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': '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',
+        'anthropic-version': '2023-06-01'
+      },      body: JSON.stringify({
         model: 'claude-sonnet-4-20250514',
         max_tokens: 1000,
         system: SYSTEM_PROMPT,

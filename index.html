@@ -1,309 +1,539 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Assistant Formation</title>
-<style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Assistant Formation — Éduc & Vous</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Serif+Display&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-  body {
-    font-family: 'Segoe UI', sans-serif;
-    background: #f0f4f8;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-  }
+    :root {
+      --purple-dark: #3C3489;
+      --purple-mid: #534AB7;
+      --purple-light: #EEEDFE;
+      --purple-border: #AFA9EC;
+      --teal: #1D9E75;
+      --gray-bg: #F7F6F2;
+      --gray-border: rgba(0,0,0,0.1);
+      --text-primary: #1a1a2e;
+      --text-secondary: #6b6b80;
+      --white: #ffffff;
+      --font: 'DM Sans', sans-serif;
+    }
 
-  .chat-container {
-    width: 100%;
-    max-width: 720px;
-    height: 92vh;
-    background: #fff;
-    border-radius: 16px;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.12);
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-  }
+    body {
+      font-family: var(--font);
+      background: var(--gray-bg);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
 
-  /* Header */
-  .chat-header {
-    background: linear-gradient(135deg, #6366f1, #8b5cf6);
-    color: white;
-    padding: 18px 24px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-  .chat-header .avatar {
-    width: 42px; height: 42px;
-    background: rgba(255,255,255,0.25);
-    border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 20px;
-  }
-  .chat-header h2 { font-size: 1rem; font-weight: 600; }
-  .chat-header p  { font-size: 0.78rem; opacity: 0.85; }
-  .status-dot {
-    width: 8px; height: 8px;
-    background: #4ade80;
-    border-radius: 50%;
-    margin-left: auto;
-    box-shadow: 0 0 6px #4ade80;
-  }
+    /* Background pattern */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        radial-gradient(circle at 20% 20%, rgba(83,74,183,0.08) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(29,158,117,0.06) 0%, transparent 50%);
+      pointer-events: none;
+    }
 
-  /* Messages */
-  .messages {
-    flex: 1;
-    overflow-y: auto;
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-    scroll-behavior: smooth;
-  }
+    .page-header {
+      text-align: center;
+      margin-bottom: 1.5rem;
+      position: relative;
+    }
 
-  .message {
-    display: flex;
-    gap: 10px;
-    max-width: 85%;
-    animation: fadeIn 0.25s ease;
-  }
-  @keyframes fadeIn { from { opacity:0; transform:translateY(6px); } to { opacity:1; } }
+    .logo-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--white);
+      border: 1px solid var(--gray-border);
+      border-radius: 100px;
+      padding: 6px 14px;
+      margin-bottom: 12px;
+    }
 
-  .message.bot  { align-self: flex-start; }
-  .message.user { align-self: flex-end; flex-direction: row-reverse; }
+    .logo-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--teal); }
 
-  .bubble {
-    padding: 12px 16px;
-    border-radius: 18px;
-    font-size: 0.9rem;
-    line-height: 1.55;
-    white-space: pre-wrap;
-  }
-  .bot  .bubble { background: #f1f0fe; color: #1e1b4b; border-bottom-left-radius: 4px; }
-  .user .bubble { background: linear-gradient(135deg, #6366f1, #8b5cf6); color: white; border-bottom-right-radius: 4px; }
+    .logo-badge span {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
 
-  .msg-avatar {
-    width: 32px; height: 32px;
-    border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 15px;
-    flex-shrink: 0;
-  }
-  .bot  .msg-avatar { background: #ede9fe; }
-  .user .msg-avatar { background: #6366f1; }
+    .page-title {
+      font-family: 'DM Serif Display', serif;
+      font-size: clamp(22px, 4vw, 32px);
+      color: var(--text-primary);
+      line-height: 1.2;
+    }
 
-  /* Typing indicator */
-  .typing .bubble {
-    display: flex; align-items: center; gap: 5px;
-    padding: 14px 18px;
-  }
-  .dot {
-    width: 7px; height: 7px;
-    background: #a5b4fc;
-    border-radius: 50%;
-    animation: bounce 1.2s infinite;
-  }
-  .dot:nth-child(2) { animation-delay: 0.2s; }
-  .dot:nth-child(3) { animation-delay: 0.4s; }
-  @keyframes bounce {
-    0%,80%,100% { transform: translateY(0); }
-    40%         { transform: translateY(-6px); }
-  }
+    .page-subtitle {
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin-top: 6px;
+    }
 
-  /* Input */
-  .input-area {
-    padding: 16px 20px;
-    border-top: 1px solid #e5e7eb;
-    background: #fff;
-    display: flex;
-    gap: 10px;
-    align-items: flex-end;
-  }
-  textarea {
-    flex: 1;
-    border: 1.5px solid #d1d5db;
-    border-radius: 12px;
-    padding: 10px 14px;
-    font-size: 0.9rem;
-    resize: none;
-    max-height: 120px;
-    outline: none;
-    transition: border-color 0.2s;
-    font-family: inherit;
-    line-height: 1.4;
-  }
-  textarea:focus { border-color: #6366f1; }
+    /* Chat container */
+    .chat-container {
+      width: 100%;
+      max-width: 720px;
+      background: var(--white);
+      border-radius: 20px;
+      border: 1px solid var(--gray-border);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      height: min(75vh, 640px);
+      box-shadow: 0 4px 32px rgba(83,74,183,0.1), 0 1px 4px rgba(0,0,0,0.06);
+      position: relative;
+    }
 
-  button#send-btn {
-    width: 44px; height: 44px;
-    background: linear-gradient(135deg, #6366f1, #8b5cf6);
-    border: none;
-    border-radius: 12px;
-    color: white;
-    font-size: 18px;
-    cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    transition: transform 0.15s, opacity 0.15s;
-    flex-shrink: 0;
-  }
-  button#send-btn:hover   { transform: scale(1.07); }
-  button#send-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    /* Header */
+    .chat-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--gray-border);
+      background: var(--white);
+    }
 
-  /* Suggestions */
-  .suggestions {
-    padding: 0 20px 12px;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-  }
-  .suggestion-chip {
-    background: #f1f0fe;
-    color: #6366f1;
-    border: 1px solid #c4b5fd;
-    border-radius: 20px;
-    padding: 5px 12px;
-    font-size: 0.78rem;
-    cursor: pointer;
-    transition: background 0.2s;
-  }
-  .suggestion-chip:hover { background: #ede9fe; }
+    .header-avatar {
+      width: 42px; height: 42px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, var(--purple-mid), var(--purple-dark));
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'DM Serif Display', serif;
+      font-size: 16px; color: white; flex-shrink: 0;
+    }
 
-  /* Scrollbar */
-  .messages::-webkit-scrollbar { width: 5px; }
-  .messages::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 10px; }
-</style>
+    .header-text h2 {
+      font-size: 15px; font-weight: 600; color: var(--text-primary);
+    }
+
+    .header-text p {
+      font-size: 12px; color: var(--text-secondary); margin-top: 1px;
+    }
+
+    .status-pill {
+      margin-left: auto;
+      display: flex; align-items: center; gap: 5px;
+      background: rgba(29,158,117,0.1);
+      border-radius: 100px;
+      padding: 4px 10px;
+      font-size: 11px; font-weight: 500; color: #0F6E56;
+      flex-shrink: 0;
+    }
+
+    .status-pill::before {
+      content: '';
+      width: 6px; height: 6px;
+      border-radius: 50%; background: var(--teal);
+    }
+
+    /* Messages */
+    #messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      scroll-behavior: smooth;
+    }
+
+    #messages::-webkit-scrollbar { width: 4px; }
+    #messages::-webkit-scrollbar-track { background: transparent; }
+    #messages::-webkit-scrollbar-thumb { background: var(--gray-border); border-radius: 4px; }
+
+    .msg { display: flex; gap: 10px; max-width: 85%; animation: fadeIn 0.2s ease; }
+    .msg.user { align-self: flex-end; flex-direction: row-reverse; }
+    .msg.bot { align-self: flex-start; }
+
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+    .msg-av {
+      width: 30px; height: 30px;
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 600; flex-shrink: 0; margin-top: 2px;
+    }
+
+    .msg.bot .msg-av { background: var(--purple-light); color: var(--purple-dark); }
+    .msg.user .msg-av { background: #f0f0f0; color: var(--text-secondary); }
+
+    .bubble {
+      padding: 11px 15px;
+      border-radius: 14px;
+      font-size: 14px;
+      line-height: 1.65;
+      white-space: pre-wrap;
+    }
+
+    .msg.bot .bubble {
+      background: #F9F8FF;
+      border: 1px solid rgba(83,74,183,0.12);
+      color: var(--text-primary);
+      border-bottom-left-radius: 4px;
+    }
+
+    .msg.user .bubble {
+      background: var(--purple-mid);
+      color: white;
+      border-bottom-right-radius: 4px;
+    }
+
+    /* Typing indicator */
+    .typing-bubble {
+      padding: 12px 16px;
+      display: flex; gap: 5px; align-items: center;
+    }
+
+    .typing-bubble span {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--purple-border);
+      animation: blink 1.2s infinite;
+    }
+    .typing-bubble span:nth-child(2) { animation-delay: 0.18s; }
+    .typing-bubble span:nth-child(3) { animation-delay: 0.36s; }
+
+    @keyframes blink { 0%,60%,100%{ opacity:.25; transform:scale(0.9); } 30%{ opacity:1; transform:scale(1.1); } }
+
+    /* Suggestions */
+    #suggestions {
+      padding: 0 20px 12px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .sug {
+      font-size: 12px;
+      padding: 6px 12px;
+      border-radius: 100px;
+      border: 1px solid rgba(83,74,183,0.25);
+      background: var(--purple-light);
+      color: var(--purple-dark);
+      cursor: pointer;
+      font-family: var(--font);
+      font-weight: 500;
+      transition: all 0.15s;
+    }
+
+    .sug:hover { background: #CECBF6; border-color: var(--purple-border); }
+
+    /* Input */
+    .input-area {
+      display: flex;
+      align-items: flex-end;
+      gap: 10px;
+      padding: 14px 16px;
+      border-top: 1px solid var(--gray-border);
+      background: var(--white);
+    }
+
+    #user-input {
+      flex: 1;
+      padding: 10px 14px;
+      font-size: 14px;
+      border: 1px solid var(--gray-border);
+      border-radius: 12px;
+      background: var(--gray-bg);
+      color: var(--text-primary);
+      outline: none;
+      resize: none;
+      font-family: var(--font);
+      line-height: 1.5;
+      min-height: 42px;
+      max-height: 120px;
+      transition: border-color 0.15s;
+    }
+
+    #user-input::placeholder { color: var(--text-secondary); }
+    #user-input:focus { border-color: var(--purple-border); background: white; }
+
+    #send-btn {
+      width: 42px; height: 42px;
+      border-radius: 12px;
+      border: none;
+      background: var(--purple-mid);
+      color: white;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      transition: background 0.15s, transform 0.1s;
+    }
+
+    #send-btn:hover { background: var(--purple-dark); }
+    #send-btn:active { transform: scale(0.95); }
+    #send-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+    #send-btn svg { width: 18px; height: 18px; }
+
+    /* Footer */
+    .page-footer {
+      margin-top: 1rem;
+      font-size: 11px;
+      color: var(--text-secondary);
+      text-align: center;
+    }
+
+    @media (max-width: 480px) {
+      .chat-container { height: calc(100dvh - 140px); border-radius: 16px; }
+      body { padding: 0.75rem; justify-content: flex-start; padding-top: 1rem; }
+    }
+  </style>
 </head>
 <body>
 
-<div class="chat-container">
-
-  <div class="chat-header">
-    <div class="avatar">🎓</div>
-    <div>
-      <h2>Assistant Formation</h2>
-      <p>Posez vos questions sur le cours</p>
+  <div class="page-header">
+    <div class="logo-badge">
+      <span class="logo-dot"></span>
+      <span>Éduc &amp; Vous</span>
     </div>
-    <div class="status-dot"></div>
+    <h1 class="page-title">Assistant de Formation</h1>
+    <p class="page-subtitle">Éduc pop 2.0 · Pouvoir d'agir augmenté</p>
   </div>
 
-  <div class="messages" id="messages">
-    <div class="message bot">
-      <div class="msg-avatar">🤖</div>
-      <div class="bubble">Bonjour ! 👋 Je suis votre assistant pédagogique. Je connais vos documents de formation et suis là pour répondre à vos questions. Comment puis-je vous aider ?</div>
+  <div class="chat-container">
+
+    <div class="chat-header">
+      <div class="header-avatar">EV</div>
+      <div class="header-text">
+        <h2>Assistant pédagogique</h2>
+        <p>Formation JEPS ASEC · 21h hybride</p>
+      </div>
+      <div class="status-pill">En ligne</div>
     </div>
+
+    <div id="messages">
+      <div class="msg bot">
+        <div class="msg-av">EV</div>
+        <div class="bubble">Bonjour ! Je suis l'assistant de votre formation <strong>Éduc pop 2.0 : Pouvoir d'agir augmenté</strong>.
+
+Je connais le programme complet, les 3 modules, les outils numériques, la charte numérique et toutes les modalités pratiques. Posez-moi vos questions !</div>
+      </div>
+    </div>
+
+    <div id="suggestions">
+      <button class="sug" onclick="askSuggestion(this)">Quels sont les modules ?</button>
+      <button class="sug" onclick="askSuggestion(this)">Quels outils numériques utilise-t-on ?</button>
+      <button class="sug" onclick="askSuggestion(this)">Que dit la charte numérique ?</button>
+      <button class="sug" onclick="askSuggestion(this)">Comment est évaluée la formation ?</button>
+      <button class="sug" onclick="askSuggestion(this)">Quels sont les prérequis ?</button>
+    </div>
+
+    <div class="input-area">
+      <textarea id="user-input" placeholder="Posez votre question sur la formation…" rows="1" onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
+      <button id="send-btn" onclick="sendMessage()" title="Envoyer">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="22" y1="2" x2="11" y2="13"></line>
+          <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+        </svg>
+      </button>
+    </div>
+
   </div>
 
-  <div class="suggestions" id="suggestions">
-    <span class="suggestion-chip" onclick="useChip(this)">📋 Résumé du cours</span>
-    <span class="suggestion-chip" onclick="useChip(this)">❓ Points clés à retenir</span>
-    <span class="suggestion-chip" onclick="useChip(this)">📝 Exercices disponibles</span>
-  </div>
-
-  <div class="input-area">
-    <textarea id="user-input" rows="1" placeholder="Écrivez votre question…"></textarea>
-    <button id="send-btn" onclick="sendMessage()" title="Envoyer">➤</button>
-  </div>
-</div>
+  <p class="page-footer">Propulsé par Claude · Éduc &amp; Vous 2025</p>
 
 <script>
-  const API_URL = "http://localhost:5000/chat";
-  let history = [];
+const SYSTEM_PROMPT = `Tu es l'assistant pédagogique de la formation "Éduc pop 2.0 : Pouvoir d'agir augmenté" proposée par Éduc & Vous. Tu réponds en français, de manière claire, bienveillante et concise, comme un formateur disponible pour ses apprenants.
 
-  const messagesEl = document.getElementById("messages");
-  const inputEl    = document.getElementById("user-input");
-  const sendBtn    = document.getElementById("send-btn");
+Voici tout ce que tu sais sur cette formation :
 
-  // Auto-resize textarea
-  inputEl.addEventListener("input", () => {
-    inputEl.style.height = "auto";
-    inputEl.style.height = Math.min(inputEl.scrollHeight, 120) + "px";
-  });
+=== INFORMATIONS GÉNÉRALES ===
+- Titre : Éduc pop 2.0 : Pouvoir d'agir augmenté — Réinventer les pratiques de formation JEPS ASEC à travers l'Éducation Populaire numérique
+- Organisme : Éduc & Vous — Conceptrice : Anne Zamora Hautier
+- Durée : 21h de formation hybride
+- Effectif : 6 à 18 apprenants
+- Public : Formateurs et animateurs JEPS ASEC en exercice ou en formation
+- Prérequis : Titre FPA (Formateur Professionnel d'Adultes) ou équivalent, avoir suivi le module en ligne introductif, expérience en animation socioculturelle souhaitée, aisance minimale avec les outils numériques
+- Matériel : Ordinateur portable avec connexion internet requis (des prêts d'ordinateur sont possibles auprès de l'employeur)
+- Ponctualité : Ne pas tarder de plus de 10 minutes en début de formation
+- Assiduité : La formation ne sera pas validée s'il manque une journée ou quelques heures
 
-  // Enter pour envoyer (Shift+Enter = nouvelle ligne)
-  inputEl.addEventListener("keydown", (e) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      sendMessage();
-    }
-  });
+=== OBJECTIFS PÉDAGOGIQUES ===
+OP1 : Planifier des séquences pédagogiques hybrides adaptées aux besoins des apprenants
+OP2 : Mobiliser des outils numériques pour faciliter la collaboration et l'interaction
+OP3 : Transposer les méthodes participatives de l'Éducation Populaire dans un format numérique
+OP4 : Concevoir un scénario pédagogique distanciel adapté à un public cible et à des objectifs précis
+OP5 : Ajuster et évaluer un dispositif hybride en fonction des retours et de l'engagement des participants
+OP6 : Piloter et animer le dispositif en conditions réelles, puis évaluer l'engagement et l'efficacité
 
-  function useChip(el) {
-    inputEl.value = el.textContent.replace(/^[^\s]+\s/, "");
-    sendMessage();
+=== MODULE 1 (7h — Présentiel synchrone) : Concevoir et piloter des dispositifs hybrides ===
+Objectifs : OP1 & OP2
+- M1S1 (1h) : Introduction — Jeu brise-glace, présentation des objectifs. Outils : Tableau connecté, PowerPoint. Éval : Questionnaire besoins & attentes
+- M1S2 (3h) : Analyse de pratique professionnelle — Méthode GEASE, World café numérique (Digistorm). Outils : La Digitale, Digiboard, Digistorm
+- M1S3 (3h) : Apports théoriques — Tutoriel interactif Genially, quiz interactifs
+- M1S4 (3h) : Recherche du sujet — Création de parcours pédagogiques, choix du sujet. Outils : La Digitale, Digisteps
+Modèle ADDIE : étape Analyse
+
+=== MODULE 2 (7h — Présentiel synchrone) : Allier numérique et Éducation Populaire ===
+Objectifs : OP3 & OP4 | Prérequis : Module 1
+- M2S1 (4h) : Scénarisation pédagogique digitale — Brainstorming, quiz, vidéo d'amorce. Outils : La Digitale, Digipad
+- M2S2 (3h) : Création de l'activité de formation — Supports numériques, tutoriels YouTube, travaux collaboratifs. Outils : La Digitale, YouTube, Digisteps
+Modèle ADDIE : étapes Design et Développement
+
+=== MODULE 3 (7h — Distanciel synchrone sur Glowbl) : Créer et tester un dispositif hybride complet ===
+Objectifs : OP5 & OP6 | Prérequis : Modules 1 & 2
+- M3S1 (2h) : Finition des supports — Canva ou Glowbl. Éval : Mise en situation professionnelle
+- M3S2 (3h) : Mise en pratique — Test des supports par les groupes sur Glowbl. Éval : Présentation de projet
+- M3S3 (1h) : Analyse des activités numériques — Évaluations quantitatives et qualitatives. Outils : Digislides, PowerPoint
+- M3S4 (1h) : Mon projet de e-formation — Portfolio de compétences. Outils : Microsoft Forms, Glowbl
+Modèle ADDIE : étapes Implantation et Évaluation
+
+=== OUTILS NUMÉRIQUES MOBILISÉS ===
+- La Digitale (ladigitale.dev) : Suite pédagogique libre et gratuite — Digiboard, Digipad, Digistorm, Digislides, Digisteps
+- Glowbl (glowbl.com) : Plateforme immersive de classe virtuelle pour le distanciel synchrone (Module 3)
+- Genially (genially.com) : Contenus interactifs et tutoriels animés
+- Canva (canva.com) : Design de supports pédagogiques visuels
+- Microsoft Forms (forms.microsoft.com) : Questionnaires, portfolio, suivi postformation
+- YouTube : Tutoriels des suites professionnelles en asynchrone
+
+=== MÉTHODES PÉDAGOGIQUES ===
+- Méthodes actives & participatives : Jeu brise-glace, World café numérique, brainstorming collaboratif (Digistorm), méthode GEASE
+- Approche inductive : partir des pratiques existantes
+- Pédagogie de projet : chaque apprenant conçoit une activité de formation réelle
+- Posture réflexive : portfolio de compétences, analyse collective, évaluation formative continue
+- Hybridation : Modules 1 & 2 en présentiel, Module 3 en distanciel synchrone
+- Modèle ADDIE : Analyse → Design → Développement → Implantation → Évaluation
+
+=== ÉVALUATION & SUIVI ===
+- Évaluation diagnostique : avant la formation (questionnaire Microsoft Forms)
+- Évaluation formative continue : quiz interactifs, observation, travaux collaboratifs
+- Évaluation sommative : présentation de projet, mise en situation (fin Module 3)
+- Portfolio de compétences : en continu + M3S4 (Microsoft Forms + Glowbl)
+- Questionnaire de satisfaction : fin de formation
+- Feuilles d'émargement papier ou numériques pour chaque demi-journée
+- Compte-rendu de chaque module transmis sous 48h
+- Suivi plan d'action postformation à 3 mois
+- Attestation de formation individuelle + certificat de réalisation (Qualiopi)
+
+=== CHARTE NUMÉRIQUE ÉDUC & VOUS ===
+1. RESPECT ET BIENVEILLANCE : Les règles de respect s'appliquent en ligne comme en présentiel. Toute production injurieuse, discriminatoire, diffamatoire ou incitant à la haine est interdite — y compris via l'IA. Un suivi des historiques sera mis en place.
+
+2. PROTECTION DES DONNÉES ET VIE PRIVÉE : Ne jamais communiquer d'informations personnelles à un outil d'IA (ni en PDF ni en photo). Ne jamais utiliser l'IA pour porter atteinte à l'image d'autrui. Toute atteinte à la vie privée est punie par la loi (articles 226-1 à 226-7 du Code pénal).
+
+3. UTILISATION RESPONSABLE DU MATÉRIEL : Limiter les usages superflus de l'IA (utiliser Écosia en priorité). Éteindre les ordinateurs après usage. Favoriser les outils libres et transparents (Framapad, La Digitale, etc.).
+
+4. UTILISATION DES RÉSEAUX SOCIAUX : Autorisée mais soumise aux lois. Tout contenu publié donne un droit d'utilisation à la plateforme — publier avec discernement.
+
+5. ESPRIT CRITIQUE ET AUTONOMIE : Vérifier les informations produites par l'IA. Citer l'utilisation d'un outil IA dans ses productions. L'IA est interdite pour les rendus scolaires. L'utiliser pour s'inspirer, pas pour tricher.
+
+CONSÉQUENCES EN CAS DE NON-RESPECT : 3 types de responsabilité — disciplinaire (règlement intérieur), civile (justice), pénale (piratage, injure, cyberharcèlement). Éduc & Vous peut mettre fin aux droits d'accès immédiatement.
+
+Réponds toujours en français. Sois précis, chaleureux et encourage les apprenants. Si une question sort du cadre de la formation, dis-le gentiment et invite à contacter directement l'équipe Éduc & Vous.`;
+
+let history = [];
+
+function autoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+}
+
+function handleKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+}
+
+function askSuggestion(btn) {
+  document.getElementById('user-input').value = btn.textContent;
+  document.getElementById('suggestions').style.display = 'none';
+  sendMessage();
+}
+
+function scrollBottom() {
+  const m = document.getElementById('messages');
+  m.scrollTop = m.scrollHeight;
+}
+
+function addMessage(role, text) {
+  const msgs = document.getElementById('messages');
+  const wrap = document.createElement('div');
+  wrap.className = 'msg ' + (role === 'user' ? 'user' : 'bot');
+  const av = document.createElement('div');
+  av.className = 'msg-av';
+  av.textContent = role === 'user' ? 'Moi' : 'EV';
+  const bub = document.createElement('div');
+  bub.className = 'bubble';
+  bub.innerHTML = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
+  wrap.appendChild(av);
+  wrap.appendChild(bub);
+  msgs.appendChild(wrap);
+  scrollBottom();
+}
+
+function showTyping() {
+  const msgs = document.getElementById('messages');
+  const wrap = document.createElement('div');
+  wrap.className = 'msg bot';
+  wrap.id = 'typing';
+  wrap.innerHTML = '<div class="msg-av">EV</div><div class="bubble typing-bubble"><span></span><span></span><span></span></div>';
+  msgs.appendChild(wrap);
+  scrollBottom();
+}
+
+function removeTyping() {
+  const t = document.getElementById('typing');
+  if (t) t.remove();
+}
+
+async function sendMessage() {
+  const input = document.getElementById('user-input');
+  const text = input.value.trim();
+  if (!text) return;
+
+  document.getElementById('send-btn').disabled = true;
+  input.value = '';
+  input.style.height = '42px';
+
+  addMessage('user', text);
+  history.push({ role: 'user', content: text });
+  showTyping();
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+headers: {
+  'Content-Type': 'application/json',
+  'x-api-key': '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',
+  'anthropic-version': '2023-06-01'
+},
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        system: SYSTEM_PROMPT,
+        messages: history
+      })
+    });
+
+    const data = await res.json();
+    removeTyping();
+    const reply = data.content?.[0]?.text || "Désolé, je n'ai pas pu répondre. Réessayez.";
+    addMessage('bot', reply);
+    history.push({ role: 'assistant', content: reply });
+  } catch (err) {
+    removeTyping();
+    addMessage('bot', "Une erreur est survenue. Vérifiez votre connexion et réessayez.");
   }
 
-  function addMessage(role, text) {
-    const wrap = document.createElement("div");
-    wrap.className = `message ${role}`;
-    const icon = role === "bot" ? "🤖" : "🧑";
-    wrap.innerHTML = `
-      <div class="msg-avatar">${icon}</div>
-      <div class="bubble">${text}</div>`;
-    messagesEl.appendChild(wrap);
-    messagesEl.scrollTop = messagesEl.scrollHeight;
-    return wrap;
-  }
-
-  function showTyping() {
-    const wrap = document.createElement("div");
-    wrap.className = "message bot typing";
-    wrap.id = "typing";
-    wrap.innerHTML = `
-      <div class="msg-avatar">🤖</div>
-      <div class="bubble">
-        <span class="dot"></span>
-        <span class="dot"></span>
-        <span class="dot"></span>
-      </div>`;
-    messagesEl.appendChild(wrap);
-    messagesEl.scrollTop = messagesEl.scrollHeight;
-  }
-
-  function hideTyping() {
-    const t = document.getElementById("typing");
-    if (t) t.remove();
-  }
-
-  async function sendMessage() {
-    const text = inputEl.value.trim();
-    if (!text) return;
-
-    // Hide suggestions after first message
-    document.getElementById("suggestions").style.display = "none";
-
-    addMessage("user", text);
-    history.push({ role: "user", content: text });
-
-    inputEl.value = "";
-    inputEl.style.height = "auto";
-    sendBtn.disabled = true;
-    showTyping();
-
-    try {
-      const res = await fetch(API_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: text, history })
-      });
-      const data = await res.json();
-      hideTyping();
-
-      const answer = data.answer || "❌ Erreur de réponse.";
-      addMessage("bot", answer);
-      history.push({ role: "assistant", content: answer });
-
-    } catch (err) {
-      hideTyping();
-      addMessage("bot", "⚠️ Impossible de contacter le serveur. Vérifiez que `app.py` est bien lancé.");
-    }
-
-    sendBtn.disabled = false;
-    inputEl.focus();
-  }
+  document.getElementById('send-btn').disabled = false;
+  input.focus();
+}
 </script>
+
 </body>
 </html>
